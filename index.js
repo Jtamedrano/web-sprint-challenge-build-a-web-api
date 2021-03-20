@@ -12,3 +12,15 @@ I need this code, but don't know where, perhaps should make some middleware, don
 
 Go code!
 */
+
+const server = require("./api/server");
+
+const main = async () => {
+  server.listen(5000, () => {
+    console.log(`Server listening on port ${5000}`);
+  });
+};
+
+main().catch((e) => {
+  throw new Error(e);
+});
