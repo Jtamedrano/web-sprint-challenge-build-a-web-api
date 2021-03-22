@@ -1,6 +1,6 @@
 // Write your "actions" router here!
 const { Router } = require("express");
-const { get } = require("./actions-model");
+const { get, insert, update, remove } = require("./actions-model");
 
 const actions = Router();
 
@@ -30,9 +30,47 @@ actions.get("/:id", (req, res) => {
 });
 
 // Post returns newly created action
+actions.post("/", (req, res) => {
+  const newUserInfo = req.body;
 
+  if (
+    newUserInfo.completed !== undefined &&
+    newUserInfo.notes !== undefined &&
+    newUserInfo.description !== undefined &&
+    newUserInfo.project_id !== undefined
+  ) {
+    insert(newUserInfo).then((data) => {
+      res.status(200).json(data);
+    });
+  } else {
+    res.status(400).json({ message: "Not Complete" });
+    return;
+  }
+});
 // Put returns updated action
+actions.put("/:id", (req, res) => {
+  const id = req.params.id;
+  if (
+    req.body.completed !== undefined &&
+    req.body.notes !== undefined &&
+    req.body.description !== undefined &&
+    req.body.project_id !== undefined
+  ) {
+    update(id, req.body).then((data) => {
+      res.status(201).json(data);
+    });
+  } else {
+    res.status(400).end();
+  }
+});
 
 // Delete returns nothing
+actions.delete("/:id", (req, res) => {
+  const id = req.params.id;
+
+  remove(id).then(() => {
+    res.status(200).end();
+  });
+});
 
 module.exports = actions;

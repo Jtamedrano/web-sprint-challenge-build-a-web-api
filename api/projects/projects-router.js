@@ -1,25 +1,14 @@
 // Write your "projects" router here!
 const { Router } = require("express");
-const { getProjectActions, get, remove } = require("./projects-model");
+const {
+  getProjectActions,
+  get,
+  insert,
+  update,
+  remove,
+} = require("./projects-model");
 
 const projects = Router();
-
-const groupExist = (req, res, next) => {
-  if (!req.params.id) {
-    res.status(404);
-    return;
-  }
-  get(Number(req.params.id)).then((data) => {
-    if (!data) {
-      res.status(404);
-      return;
-    }
-
-    if (data) {
-      next();
-    }
-  });
-};
 
 projects.get("/", (req, res) => {
   get().then((data) => {
@@ -33,18 +22,57 @@ projects.get("/:id/actions", (req, res) => {
 
   getProjectActions(Number(id)).then((data) => {
     console.log(data);
-    if (!data || data.length === 0) {
-      res.status(404).json([]);
-      return;
-    }
     res.json(data);
   });
 });
 
-projects.delete("/:id", groupExist, async (req, _) => {
+projects.get("/:id", (req, res) => {
   const id = req.params.id;
-  remove(id);
-  return;
+
+  get(id).then((data) => {
+    if (!data) {
+      res.status(404).end();
+      return;
+    }
+
+    res.status(200).json(data);
+  });
+});
+
+projects.post("/", (req, res) => {
+  const info = req.body;
+  if (!!info.name && !!info.description && info.completed !== undefined) {
+    insert(req.body).then((data) => {
+      res.status(200).json(data);
+    });
+  } else {
+    res.status(400).eng();
+  }
+});
+
+projects.put("/:id", (req, res) => {
+  const id = req.params.id;
+
+  const info = req.body;
+
+  if (!!info.name && !!info.description && info.completed !== undefined) {
+    update(id, info).then((data) => {
+      res.status(200).json(data);
+    });
+  } else {
+    res.status(400).end();
+  }
+});
+
+projects.delete("/:id", (req, res) => {
+  const id = req.params.id;
+  remove(id).then((data) => {
+    if (!data) {
+      res.status(404).end();
+      return;
+    }
+    res.status(200).end();
+  });
 });
 
 module.exports = projects;
